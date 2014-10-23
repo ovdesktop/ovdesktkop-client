@@ -1,0 +1,4 @@
+.checkbox.no-indent,
+.checkbox.no-indent+.checkbox.inline.no-indent {
+  margin-left: 20;
+}
