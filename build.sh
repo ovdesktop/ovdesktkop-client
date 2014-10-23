@@ -24,5 +24,6 @@ if [ $OS == "Mac" ]; then
   PATH_APP='build/MacOSX/Atom.app/Contents/Resources/app'
   mkdir -p $PATH_APP
   cp -R $SRC/* $PATH_APP
+  mv build/MacOSX/Atom.app build/MacOSX/ovDesktop-client.app
   echo "MacOSX package created!"
 fi
