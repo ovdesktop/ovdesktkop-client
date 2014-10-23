@@ -21,15 +21,27 @@
 
       <form class="form-signin" role="form">
         <h2 class="form-signin-heading">Sign in</h2>
-        <input type="username" class="form-control" placeholder="Username" required autofocus>
+        <input type="username" class="form-control" placeholder="Username" value="root@pam" required autofocus>
         <input type="password" class="form-control" placeholder="Password" required>
-        <input type="host" class="form-control" placeholder="Host" required>
+        <input type="host" class="form-control" placeholder="Host" value="101" required>
+        <!--
         <label class="checkbox no-indent">
           <input type="checkbox" value="remember-me"> Remember
         </label>
+        -->
+        <br />
         <button class="btn btn-lg btn-primary btn-block" type="submit">Connect</button>
       </form>
 
+    </div>
+    <div class="footer">
+      <div class="container">
+        <script>
+          var remote = require('remote');
+          document.write(remote.require('app').getName());
+          document.write(' (' + remote.require('app').getVersion() + ')')
+        </script>
+      </div>
     </div>
   </body>
 </html>
