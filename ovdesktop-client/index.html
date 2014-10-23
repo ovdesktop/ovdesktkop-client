@@ -10,6 +10,18 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/ovdesktop.css" rel="stylesheet">
 
+    <script>
+      function connect()
+      {
+        var login = [];
+        login[0] = document.forms['login']['username'].value;
+        login[1] = document.forms['login']['password'].value;
+        login[2] = document.forms['login']['host'].value;
+
+        var ipc = require('ipc');
+        ipc.send('login', login);
+      }
+    </script>
   </head>
   <body>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -19,18 +31,18 @@
 
     <div class="container">
 
-      <form class="form-signin" role="form">
+      <form class="form-signin" role="form" id="login">
         <h2 class="form-signin-heading">Sign in</h2>
-        <input type="username" class="form-control" placeholder="Username" value="root@pam" required autofocus>
-        <input type="password" class="form-control" placeholder="Password" required>
-        <input type="host" class="form-control" placeholder="Host" value="101" required>
+        <input type="username" id="username" class="form-control" placeholder="Username" value="root@pam" required autofocus>
+        <input type="password" id="password" class="form-control" placeholder="Password" value="1234" required>
+        <input type="host" id="host" class="form-control" placeholder="Host" value="101" required>
         <!--
         <label class="checkbox no-indent">
           <input type="checkbox" value="remember-me"> Remember
         </label>
         -->
         <br />
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Connect</button>
+        <button class="btn btn-lg btn-primary btn-block" type="submit" onclick="connect()">Connect</button>
       </form>
 
     </div>
