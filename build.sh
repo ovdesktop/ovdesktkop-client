@@ -26,4 +26,18 @@ if [ $OS == "Mac" ]; then
   cp -R $SRC/* $PATH_APP
   mv build/MacOSX/Atom.app build/MacOSX/ovDesktop-client.app
   echo "MacOSX package created!"
+elif [ $OS == "Linux" ]; then
+  if [ -d build ]; then
+    rm -fR build
+    echo "Cache clear..."
+  fi
+  mkdir -p build/Linux
+  cp -R atom-shell/ build/Linux/
+
+  PATH_APP='build/Linux/atom-shell/resources/app'
+  mkdir -p $PATH_APP
+  cp -R $SRC/* $PATH_APP
+  mv build/Linux/atom-shell build/Linux/ovDesktop-client
+  mv build/Linux/ovDesktop-client/atom build/Linux/ovDesktop-client/ovDesktop-client
+  echo "Linux package created!"
 fi
