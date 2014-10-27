@@ -1,6 +1,7 @@
 function proxmoxAuth(server, username, password, callback){
   var https = require('https');
   var querystring = require('querystring');
+  var status = '';
   var body = '';
   var ticket = '';
   var csrf = '';
@@ -25,6 +26,7 @@ function proxmoxAuth(server, username, password, callback){
   };
 
   var req = https.request(options, function(res) {
+    status = res.statusCode;
     res.setEncoding('utf8');
     res.on('data', function (chunk) {
       body += chunk;
@@ -36,38 +38,28 @@ function proxmoxAuth(server, username, password, callback){
   });
 
   req.on('close', function() {
-    json = JSON.parse(body);
-    ticket = json.data.ticket;
-    csrf = json.data.CSRFPreventionToken;
-    callback(ticket, csrf);
+    if (status == 200) {
+      json = JSON.parse(body);
+      ticket = json.data.ticket;
+      csrf = json.data.CSRFPreventionToken;
+    }
+    callback(status, ticket, csrf);
   });
 
   req.write(data);
   req.end();
 };
 
-function proxmoxGetSpiceConfig(ticket, csrf, server, host, file, callback){
-  // It works with Curl. For some reason I can't get this working with https request method :(
-  var exec = require('child_process').exec, child;
-  child = exec('curl -f -s -S -k -b "PVEAuthCookie=' + ticket + '" -H "CSRFPreventionToken: ' + csrf + '" https://' + server + ':8006/api2/spiceconfig/nodes/proxtest/qemu/' + host + '/spiceproxy -d "proxy=proxtest" > ' + file,
-    function (error, stdout, stderr) {
-      if (error !== null) {
-        console.log('exec error: ' + error);
-      };
-    });
-
-  child.on('close', function() {
-    callback();
-  });
-  // With HTTPS request method (not working)
-  /*
+function proxmoxGetSpiceConfig(ticket, csrf, server, host, callback){
+  var nodename = 'proxtest'; //FIX: hardcoded, get it from API...
   var https = require('https');
   var querystring = require('querystring');
   var body = '';
+  var status = '';
 
   var cookie = 'PVEAuthCookie=' + ticket;
   var data = querystring.stringify({
-    proxy: 'proxtest'
+    proxy: nodename
   });
 
   var options = {
@@ -76,33 +68,35 @@ function proxmoxGetSpiceConfig(ticket, csrf, server, host, file, callback){
     rejectUnauthorized: false,
     requestCert: true,
     agent: false,
-    path: '/api2/spiceconfig/nodes/proxtest/qemu/101/spiceproxy',
+    path: '/api2/spiceconfig/nodes/' + nodename + '/qemu/' + host + '/spiceproxy',
     method: 'POST',
     headers: {
       'CSRFPreventionToken': csrf,
+      'Cookie': cookie,
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': Buffer.byteLength(data)
     }
   };
 
   var req = https.request(options, function(res) {
-    console.log('STATUS: ' + res.statusCode);
-    console.log('HEADERS: ' + JSON.stringify(res.headers));
-    console.log('Res: ' + res.headersSent);
+    status = res.statusCode;
     res.setEncoding('utf8');
     res.on('data', function (chunk) {
       body += chunk;
-      console.log('body: ' + chunk);
     });
   });
 
   req.on('error', function(e) {
-    console.log('problem with request: ' + e.message);
+    console.log('Problem with request: ' + e.message);
+  });
+
+  req.on('close', function() {
+    callback(status, body);
   });
 
   req.write(data);
   req.end();
-  */
+
 };
 
 function execSpiceClient(file) {
@@ -114,7 +108,7 @@ function execSpiceClient(file) {
     spiceclient = '/Applications/RemoteViewer.app/Contents/MacOS/RemoteViewer';
     args = '';
   } else if (process.platform == 'win*') {
-    spiceclient = 'c:\Program Files\RemoteViewer\RemoteViewer.exe';
+    spiceclient = 'c:\Program Files\RemoteViewer\RemoteViewer.exe'; // FIX and test...
     args = '';
   }
   child = exec(spiceclient + ' ' + file + ' ' + args,
@@ -159,10 +153,28 @@ ipc.on('btnConnect', function(event, arg) {
   var server = '10.15.180.40'; // Hardcoded! To do: external config file
   var ticket = '';
   var csrf = '';
-  var sconfigfile = '/tmp/spiceproxy'; // Fix: should be multiplatform
-  authdata = proxmoxAuth(server, username, password, function (ticket, csrf) {
-    proxmoxGetSpiceConfig(ticket, csrf, server, host, sconfigfile, function () {
-      execSpiceClient(sconfigfile);
-    });
+
+  os = require('os');
+  var sconfigfile = os.tmpdir() + '/spiceproxy';
+
+  authdata = proxmoxAuth(server, username, password, function (status, ticket, csrf) {
+    if (status == 200) {
+      proxmoxGetSpiceConfig(ticket, csrf, server, host, function (status, sconfig) {
+        if (status == 200) {
+          var fs = require('fs');
+          fs.writeFile(sconfigfile, sconfig, function(err) {
+            if (err) {
+              console.log(error);
+            } else {
+              execSpiceClient(sconfigfile);
+            }
+          })
+        } else {
+          console.log('ERROR: cannot get spice proxy configuration file');
+        }
+      });
+    } else {
+      console.log('ERROR: authentication error');
+    }
   })
 });
