@@ -46,7 +46,7 @@ function proxmoxAuth(server, username, password, callback){
   req.end();
 };
 
-function proxmoxGetSpiceConfig(ticket, csrf, server, host, file){
+function proxmoxGetSpiceConfig(ticket, csrf, server, host, file, callback){
   // It works with Curl. For some reason I can't get this working with https request method :(
   var exec = require('child_process').exec, child;
   child = exec('curl -f -s -S -k -b "PVEAuthCookie=' + ticket + '" -H "CSRFPreventionToken: ' + csrf + '" https://' + server + ':8006/api2/spiceconfig/nodes/proxtest/qemu/' + host + '/spiceproxy -d "proxy=proxtest" > ' + file,
@@ -55,6 +55,10 @@ function proxmoxGetSpiceConfig(ticket, csrf, server, host, file){
         console.log('exec error: ' + error);
       };
     });
+
+  child.on('close', function() {
+    callback();
+  });
   // With HTTPS request method (not working)
   /*
   var https = require('https');
@@ -103,8 +107,16 @@ function proxmoxGetSpiceConfig(ticket, csrf, server, host, file){
 
 function execSpiceClient(file) {
   var exec = require('child_process').exec, child;
-  // Fix: I guess it doesn't work on MacOSX
-  child = exec('remote-viewer ' + file + ' -t ovdesktop-client -f',
+  var os = 'mac'; // TO DO: Detect OS
+  if (os == 'linux') {
+    spiceclient = 'remote-viewer';
+    args = '--full-screen';
+  } else if (os == 'mac') {
+    spiceclient = '/Applications/RemoteViewer.app/Contents/MacOS/RemoteViewer';
+    args = '';
+  }
+  //child = exec('remote-viewer ' + file + ' -t ovdesktop-client -f',
+  child = exec(spiceclient + ' ' + file + ' ' + args,
     function (error, stdout, stderr) {
       if (error !== null) {
         console.log('exec error: ' + error);
@@ -143,12 +155,13 @@ ipc.on('btnConnect', function(event, arg) {
   password = arg.password;
   host = arg.host;
 
-  var server = '10.15.180.39'; // Hardcoded! To do: external config file
+  var server = '10.15.180.40'; // Hardcoded! To do: external config file
   var ticket = '';
   var csrf = '';
   var sconfigfile = '/tmp/spiceproxy'; // Fix: should be multiplatform
   authdata = proxmoxAuth(server, username, password, function (ticket, csrf) {
-    proxmoxGetSpiceConfig(ticket, csrf, server, host, sconfigfile);
-    execSpiceClient(sconfigfile);
+    proxmoxGetSpiceConfig(ticket, csrf, server, host, sconfigfile, function () {
+      execSpiceClient(sconfigfile);
+    });
   })
 });
