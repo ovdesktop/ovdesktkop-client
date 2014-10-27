@@ -119,6 +119,8 @@ function execSpiceClient(file) {
     });
 };
 
+var config = require('./config');
+console.log(config.proxmox.server);
 var app = require('app');
 var BrowserWindow = require('browser-window');
 
@@ -150,7 +152,7 @@ ipc.on('btnConnect', function(event, arg) {
   password = arg.password;
   host = arg.host;
 
-  var server = '10.15.180.40'; // Hardcoded! To do: external config file
+  var server = config.proxmox.server;
   var ticket = '';
   var csrf = '';
 
