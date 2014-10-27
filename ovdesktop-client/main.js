@@ -107,15 +107,16 @@ function proxmoxGetSpiceConfig(ticket, csrf, server, host, file, callback){
 
 function execSpiceClient(file) {
   var exec = require('child_process').exec, child;
-  var os = 'mac'; // TO DO: Detect OS
-  if (os == 'linux') {
+  if (process.platform == 'linux') {
     spiceclient = 'remote-viewer';
     args = '--full-screen';
-  } else if (os == 'mac') {
+  } else if (process.platform == 'darwin') {
     spiceclient = '/Applications/RemoteViewer.app/Contents/MacOS/RemoteViewer';
     args = '';
+  } else if (process.platform == 'win*') {
+    spiceclient = 'c:\Program Files\RemoteViewer\RemoteViewer.exe';
+    args = '';
   }
-  //child = exec('remote-viewer ' + file + ' -t ovdesktop-client -f',
   child = exec(spiceclient + ' ' + file + ' ' + args,
     function (error, stdout, stderr) {
       if (error !== null) {
