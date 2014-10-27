@@ -13,13 +13,12 @@
     <script>
       function connect()
       {
-        var login = [];
-        login[0] = document.forms['login']['username'].value;
-        login[1] = document.forms['login']['password'].value;
-        login[2] = document.forms['login']['host'].value;
-
         var ipc = require('ipc');
-        ipc.send('login', login);
+        ipc.send('login', {
+          username: document.forms['login']['username'].value,
+          password: document.forms['login']['password'].value,
+          host: document.forms['login']['host'].value
+        });
       }
     </script>
   </head>

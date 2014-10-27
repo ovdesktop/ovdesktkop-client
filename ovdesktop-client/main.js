@@ -146,10 +146,10 @@ app.on('ready', function() {
 
 var ipc = require('ipc');
 ipc.on('login', function(event, arg) {
-  // Fix with an object: not easy to mantain
-  username = arg[0];
-  password = arg[1];
-  host = arg[3];
+  username = arg.username;
+  password = arg.password;
+  host = arg.host;
+  
   var server = '10.15.180.39'; // Hardcoded!
   var ticket = '';
   var csrf = '';
