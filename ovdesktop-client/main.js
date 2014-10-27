@@ -11,7 +11,7 @@ function proxmoxAuth(server, username, password, callback){
   });
 
   var options = {
-    hostname: "10.15.180.39",
+    hostname: server,
     port: 8006,
     rejectUnauthorized: false,
     requestCert: true,
@@ -25,8 +25,6 @@ function proxmoxAuth(server, username, password, callback){
   };
 
   var req = https.request(options, function(res) {
-    //console.log('STATUS: ' + res.statusCode);
-    //console.log('HEADERS: ' + JSON.stringify(res.headers));
     res.setEncoding('utf8');
     res.on('data', function (chunk) {
       body += chunk;
@@ -48,15 +46,11 @@ function proxmoxAuth(server, username, password, callback){
   req.end();
 };
 
-function proxmoxGetSpiceProxy(ticket, csrf, server, host, spiceproxy){
-  //console.log('Ticket: ' + ticket);
-  //console.log('CSRF: ' + csrf);
+function proxmoxGetSpiceConfig(ticket, csrf, server, host, file){
   // It works with Curl. For some reason I can't get this working with https request method :(
   var exec = require('child_process').exec, child;
-  child = exec('curl -f -s -S -k -b "PVEAuthCookie=' + ticket + '" -H "CSRFPreventionToken: ' + csrf + '" https://' + server + ':8006/api2/spiceconfig/nodes/proxtest/qemu/101/spiceproxy -d "proxy=proxtest" > ' + spiceproxy,
+  child = exec('curl -f -s -S -k -b "PVEAuthCookie=' + ticket + '" -H "CSRFPreventionToken: ' + csrf + '" https://' + server + ':8006/api2/spiceconfig/nodes/proxtest/qemu/' + host + '/spiceproxy -d "proxy=proxtest" > ' + file,
     function (error, stdout, stderr) {
-      //console.log('stdout: ' + stdout);
-      //console.log('stderr: ' + stderr);
       if (error !== null) {
         console.log('exec error: ' + error);
       };
@@ -107,12 +101,11 @@ function proxmoxGetSpiceProxy(ticket, csrf, server, host, spiceproxy){
   */
 };
 
-function execSpiceClient(spiceproxy) {
+function execSpiceClient(file) {
   var exec = require('child_process').exec, child;
-  child = exec('remote-viewer ' + spiceproxy + ' -t ovdesktop-client -f',
+  // Fix: I guess it doesn't work on MacOSX
+  child = exec('remote-viewer ' + file + ' -t ovdesktop-client -f',
     function (error, stdout, stderr) {
-      //console.log('stdout: ' + stdout);
-      //console.log('stderr: ' + stderr);
       if (error !== null) {
         console.log('exec error: ' + error);
       };
@@ -145,18 +138,17 @@ app.on('ready', function() {
 });
 
 var ipc = require('ipc');
-ipc.on('login', function(event, arg) {
+ipc.on('btnConnect', function(event, arg) {
   username = arg.username;
   password = arg.password;
   host = arg.host;
-  
-  var server = '10.15.180.39'; // Hardcoded!
+
+  var server = '10.15.180.39'; // Hardcoded! To do: external config file
   var ticket = '';
   var csrf = '';
-  var spiceproxy = '/tmp/spiceproxy';
+  var sconfigfile = '/tmp/spiceproxy'; // Fix: should be multiplatform
   authdata = proxmoxAuth(server, username, password, function (ticket, csrf) {
-    //console.log(ticket);
-    proxmoxGetSpiceProxy(ticket, csrf, server, host, spiceproxy);
-    execSpiceClient(spiceproxy);
+    proxmoxGetSpiceConfig(ticket, csrf, server, host, sconfigfile);
+    execSpiceClient(sconfigfile);
   })
 });
