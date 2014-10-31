@@ -62,6 +62,24 @@ ipc.on('btnConnect', function(event, arg) {
 
   authdata = proxmox.auth(server, username, password, function (status, ticket, csrf) {
     if (status == 200) {
+      //
+      // Testing some methods
+      //
+      proxmox.getVmList(ticket, server, function(status, vmlist) {
+        if (status == 200) {
+          console.log('SPICE enabled available VM:');
+          for(var vm in vmlist.data){
+            if (vmlist.data[vm].status == 'running') {
+              vmid = vmlist.data[vm].vmid;
+              proxmox.getVmConfig(ticket, server, vmid, function (status, vmconfig) {
+                if (status == 200) {
+                  console.log(vmconfig.data.name + ': ' + proxmox.isSpiceEnabled(vmconfig, vmid));
+                }
+              });
+            }
+          }
+        }
+      });
       proxmox.getSpiceConfig(ticket, csrf, server, host, function (status, sconfig) {
         if (status == 200) {
           var fs = require('fs');
