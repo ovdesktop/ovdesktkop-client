@@ -22,11 +22,15 @@ var config = require('./config');   // Config file
 var proxmox = require('./proxmox'); // Proxmox methods
 
 var app = require('app');
+var path = require('path');
 var BrowserWindow = require('browser-window');
+var Tray = require('tray');
+var Menu = require('menu');
 
 require('crash-reporter').start();
 
 var mainWindow = null;
+var appIcon = null;
 
 // Quit when all windows are closed
 app.on('window-all-closed', function() {
@@ -37,7 +41,13 @@ app.on('window-all-closed', function() {
 
 // Ready for creating browser windows
 app.on('ready', function() {
-  mainWindow = new BrowserWindow({width: 300, height: 500});
+  //appIcon = new Tray(path.join(__dirname, 'img/ovdesktop-logo.png'));
+  //appIcon.setToolTip('ovdesktop-client');
+  var contextMenu = Menu.buildFromTemplate([
+    { label: 'Item1', type: 'radio' }
+  ]);
+  //appIcon.setContextMenu(contextMenu);
+  mainWindow = new BrowserWindow({width: 300, height: 500, icon: path.join(__dirname, 'img/ovdesktop-logo.png')});
   mainWindow.loadUrl('file://' + __dirname + '/index.html');
 
   // Window closed
@@ -65,6 +75,7 @@ ipc.on('btnConnect', function(event, arg) {
       //
       // Testing some methods
       //
+      /*
       proxmox.getVmList(ticket, server, function(status, vmlist) {
         if (status == 200) {
           console.log('SPICE enabled available VM:');
@@ -80,6 +91,7 @@ ipc.on('btnConnect', function(event, arg) {
           }
         }
       });
+      */
       proxmox.getSpiceConfig(ticket, csrf, server, host, function (status, sconfig) {
         if (status == 200) {
           var fs = require('fs');
