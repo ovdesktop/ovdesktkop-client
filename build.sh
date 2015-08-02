@@ -19,12 +19,12 @@ if [ $OS == "Mac" ]; then
     echo "Cache clear..."
   fi
   mkdir -p build/MacOSX
-  cp -R atom-shell/Atom.app build/MacOSX
+  cp -R electron/Electron.app build/MacOSX
 
-  PATH_APP='build/MacOSX/Atom.app/Contents/Resources/app'
+  PATH_APP='build/MacOSX/Electron.app/Contents/Resources/app'
   mkdir -p $PATH_APP
   cp -R $SRC/* $PATH_APP
-  mv build/MacOSX/Atom.app build/MacOSX/ovDesktop-client.app
+  mv build/MacOSX/Electron.app build/MacOSX/ovDesktop-client.app
   echo "MacOSX package created!"
 elif [ $OS == "Linux" ]; then
   if [ -d build ]; then
