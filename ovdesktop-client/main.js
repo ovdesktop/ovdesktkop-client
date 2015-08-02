@@ -44,7 +44,10 @@ app.on('ready', function() {
   appIcon = new Tray(path.join(__dirname, 'img/ovdesktop-menubar-icon@2x.png'));
   appIcon.setToolTip('ovdesktop-client');
   var contextMenu = Menu.buildFromTemplate([
-    { label: 'About', type: 'radio' }
+    { type: 'separator' },
+    { label: 'About ovDesktop', selector: 'orderFrontStandardAboutPanel:' },
+    { type: 'separator'},
+    { label: 'Quit', accelerator: 'CmdOrCtrl+Q', selector: 'terminate:'}
   ]);
   appIcon.setContextMenu(contextMenu);
   mainWindow = new BrowserWindow({width: 300, height: 500, icon: path.join(__dirname, 'img/ovdesktop-logo.png')});
