@@ -41,12 +41,12 @@ app.on('window-all-closed', function() {
 
 // Ready for creating browser windows
 app.on('ready', function() {
-  //appIcon = new Tray(path.join(__dirname, 'img/ovdesktop-logo.png'));
-  //appIcon.setToolTip('ovdesktop-client');
+  appIcon = new Tray(path.join(__dirname, 'img/ovdesktop-menubar-icon@2x.png'));
+  appIcon.setToolTip('ovdesktop-client');
   var contextMenu = Menu.buildFromTemplate([
-    { label: 'Item1', type: 'radio' }
+    { label: 'About', type: 'radio' }
   ]);
-  //appIcon.setContextMenu(contextMenu);
+  appIcon.setContextMenu(contextMenu);
   mainWindow = new BrowserWindow({width: 300, height: 500, icon: path.join(__dirname, 'img/ovdesktop-logo.png')});
   mainWindow.loadUrl('file://' + __dirname + '/index.html');
 
