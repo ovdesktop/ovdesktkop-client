@@ -32,12 +32,12 @@ elif [ $OS == "Linux" ]; then
     echo "Cache clear..."
   fi
   mkdir -p build/Linux
-  cp -R atom-shell/ build/Linux/
+  cp -R electron/ build/Linux/
 
-  PATH_APP='build/Linux/atom-shell/resources/app'
+  PATH_APP='build/Linux/electron/resources/app'
   mkdir -p $PATH_APP
   cp -R $SRC/* $PATH_APP
-  mv build/Linux/atom-shell build/Linux/ovDesktop-client
-  mv build/Linux/ovDesktop-client/atom build/Linux/ovDesktop-client/ovDesktop-client
+  mv build/Linux/electron build/Linux/ovDesktop-client
+  mv build/Linux/ovDesktop-client/electron build/Linux/ovDesktop-client/ovDesktop-client
   echo "Linux package created!"
 fi

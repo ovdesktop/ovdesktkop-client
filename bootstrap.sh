@@ -17,16 +17,16 @@ if [ "$(uname)" == "Darwin" ]; then
   echo "Run: ./electron/Electron.app/Contents/MacOS/Electron ovdesktop-client"
 
 elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
-  URL="https://github.com/atom/atom-shell/releases/download/v0.19.2/atom-shell-v0.19.2-linux-x64.zip"
-  if [ -d "atom-shell" ]; then
-    echo "atom-shell directory already exists!"
+  URL="https://github.com/atom/electron/releases/download/v0.32.1/electron-v0.32.1-linux-x64.zip"
+  if [ -d "electron" ]; then
+    echo "electron directory already exists!"
     echo "nothing to do."
   else
-    echo "downloading atom-shell..."
-    wget -q $URL -O atom-shell.zip
-    unzip -q atom-shell.zip -d atom-shell
-    rm atom-shell.zip
+    echo "downloading electron..."
+    wget -q $URL -O electron.zip
+    unzip -q electron.zip -d electron
+    rm electron.zip
     echo "done!"
   fi
-  echo "Run: ./atom-shell/atom ovdesktop-client"
+  echo "Run: ./electron/electron ovdesktop-client"
 fi
