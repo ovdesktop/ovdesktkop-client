@@ -1,3 +1,5 @@
 /atom-shell
 /electron
 /build
+/ovdesktop-client/config.js
+!/ovdesktop-client/config.js.dist
