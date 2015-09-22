@@ -158,7 +158,8 @@ Proxmox.getSpiceConfig = function(ticket, csrf, server, host, callback) {
 
   var cookie = 'PVEAuthCookie=' + ticket;
   var data = querystring.stringify({
-    proxy: nodename
+    //proxy: nodename
+    proxy: server
   });
 
   var options = {
